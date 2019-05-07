@@ -26,9 +26,7 @@ namespace Vidly.Controllers
 
         public ActionResult Index()
         {
-            IEnumerable<Customer> customers = _context.Customers.Include(c => c.MembershipType);
-
-            return View(customers);
+            return View();
         }
 
         public ActionResult New()
