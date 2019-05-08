@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
 using System.Web.Mvc;
 using Vidly.Models;
@@ -34,7 +35,10 @@ namespace Vidly.Controllers
 
         public ViewResult Index()
         {
-            return View();
+            if (User.IsInRole(RoleName.CanManageMovies))
+                return View("List");
+            else
+                return View("ReadOnlyList");
         }
 
         public ActionResult Details(int id)
@@ -46,6 +50,7 @@ namespace Vidly.Controllers
             return View(movie);
         }
 
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public ActionResult New()
         {
             List<Genre> genres = _context.Genres.ToList();
@@ -59,6 +64,7 @@ namespace Vidly.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public ActionResult Save(Movie movie)
         {
             if (!ModelState.IsValid)
@@ -91,6 +97,7 @@ namespace Vidly.Controllers
             return RedirectToAction("Index", "Movies");
         }
 
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public ActionResult Edit(int id)
         {
             Movie movie = _context.Movies.FirstOrDefault(m => m.Id == id);
@@ -105,43 +112,6 @@ namespace Vidly.Controllers
 
             return View("MovieForm", viewModel);
         }
-
-        //private IEnumerable<Movie> GetMovies()
-        //{
-        //    return new List<Movie>
-        //    {
-        //        new Movie() { Id = 1, Name = "Shrek" },
-        //        new Movie() { Id = 2, Name = "Wall-E" }
-        //    };
-        //}
-
-        //public ActionResult Edit(int id)
-        //{
-        //    return Content("id=" + id);
-        //}
-
-        //// movies
-        //public ActionResult Index(int? pageIndex, string sortBy)
-        //{
-        //    if (!pageIndex.HasValue)
-        //    {
-        //        pageIndex = 1;
-
-        //    }
-
-        //    if (string.IsNullOrWhiteSpace(sortBy))
-        //    {
-        //        sortBy = "Name";
-        //    }
-
-        //    return Content(String.Format("pageIndex={0}&sortBy={1}", pageIndex, sortBy));
-        //}
-
-        //[Route("movies/released/{year}/{month:regex(\\d{4}):range(1, 12)}")]
-        //public ActionResult ByReleaseYear(int year, int month)
-        //{
-        //    return Content(year + "/" + month);
-        //}
-
+ 
     }
 }
